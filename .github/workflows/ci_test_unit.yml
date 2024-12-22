@@ -40,9 +40,5 @@ jobs:
 
       # Exécution des tests unitaires
       - name: Run unit tests with pytest
-        env:
-          # Variables d'environnement simulées
-          MLFLOW_TRACKING_URI: http://mockserver:5001
-          DATABASE_URL: sqlite:///:memory  # Base de données en mémoire si nécessaire
         run: |
           pytest --maxfail=1 --disable-warnings -q
