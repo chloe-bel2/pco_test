@@ -4,8 +4,12 @@ import os
 from unittest.mock import patch
 import requests
 
+import numpy as np
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from functions import calcul_metrics
+from functions import calcul_metrics, best_skill
+from sklearn.metrics.pairwise import cosine_similarity
+import faiss
 
 # Patch des requetes serveurs avant l'importation de app.py
 
@@ -41,6 +45,42 @@ def test_calcul_metrics():
     assert precision_contxt >= 0 and precision_contxt <= 1, "precision_contxt doit être entre 0 et 1"
     assert recall_contxt >= 0 and recall_contxt <= 1, "recall_contxt doit être entre 0 et 1"
     assert f1_contxt >= 0 and f1_contxt <= 1, "f1_contxt doit être entre 0 et 1"
+
+@patch('numpy.load')
+def test_best_skill(mock_load):
+    # Créer un mock_array avec la même forme que array_comp_esco.npy
+    dtype = [('id', 'i4'), ('skill', 'U10')] + [('vector_' + str(i), 'f4') for i in range(1024)]  # 1024 colonnes pour les vecteurs
+    mock_array = np.zeros((10, ), dtype=dtype)
+    
+    # Remplir les données avec des valeurs factices
+    for i in range(10):
+        mock_array[i]['id'] = i
+        mock_array[i]['skill'] = 'Skill' + str(i)  # Compétences sous forme de chaînes
+        for j in range(1024):
+            mock_array[i]['vector_' + str(j)] = np.random.rand()
+    # Mock de np.load pour qu'il retourne notre tableau factice
+    mock_load.return_value = mock_array
+
+    # Définir un vecteur fictif pour tester best_skill
+    i = 0  # Choisir la première ligne comme exemple
+    vector = np.array([mock_array[i]['vector_' + str(j)] for j in range(1024)])
+
+    assert vector.shape == (1024,), "La dimension du vecteur n'est pas 1024"
+
+    vector_dim = 1024
+    index = faiss.IndexFlatL2(vector_dim)
+    vectors_comp = np.array([[mock_array[i]['vector_' + str(j)] for j in range(1024)] for i in range(10)])  # Extraire les 1024 dimensions de chaque ligne
+
+    assert vectors_comp.shape == (10, 1024), "La forme de vectors_comp n'est pas correcte"
+
+    index.add(vectors_comp)
+
+    # Appeler la fonction best_skill
+    threshold_skill=0
+    result = best_skill(vector, threshold_skill=threshold_skill)
+
+    # Vérifier que le résultat est correct (basé sur la logique de ta fonction)
+    assert isinstance(result, dict), "Le résultat doit être un dictionnaire"
 
 # Fixture client déplacée en dehors de la fonction de test
 @pytest.fixture
