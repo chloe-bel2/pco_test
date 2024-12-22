@@ -122,7 +122,7 @@ if is_github_actions:
     file_path = os.path.join(os.path.dirname(__file__), 'DB_pco', 'array_comp_esco.npy')
 else:'''
 # Sinon, utilisez un chemin absolu (pour votre machine locale)
-file_path = 'C:\\Users\\Utilisateur\\Documents\\Prepa_Diplome\\PCO_nov\\DB_pco\\array_comp_esco.npy'
+file_path = 'C:\\Users\\Utilisateur\\Documents\\Prepa_Diplome\\PCO_dec2\\DB_pco\\array_comp_esco.npy'
 
 # Charger le fichier .npy avec le chemin approprié
 array_comp = np.load(file_path, allow_pickle = True)
