@@ -6,13 +6,14 @@ import requests
 
 import numpy as np
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from functions import calcul_metrics, best_skill
 from sklearn.metrics.pairwise import cosine_similarity
 import faiss
 
-# Patch des requetes serveurs avant l'importation de app.py
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from functions import calcul_metrics
 
+
+# Patch des requetes serveurs avant l'importation de app.py
 @patch('requests.get') 
 def test_example(mock_get):
     # Simule une réponse de type "200 OK"
@@ -48,17 +49,17 @@ def test_calcul_metrics():
 
 @patch('numpy.load')
 def test_best_skill(mock_load):
-    # Créer un mock_array avec la même forme que array_comp_esco.npy
-    dtype = [('id', 'i4'), ('skill', 'U10')] + [('vector_' + str(i), 'f4') for i in range(1024)]  # 1024 colonnes pour les vecteurs
-    mock_array = np.zeros((10, ), dtype=dtype)
-    
+
+    dtype = [('id', 'i4'), ('skill', 'U10')] + [('vector_' + str(i), 'f4') for i in range(1024)]
+    mock_array = np.zeros((10,), dtype=dtype)
+
     # Remplir les données avec des valeurs factices
     for i in range(10):
         mock_array[i]['id'] = i
-        mock_array[i]['skill'] = f'Skill{i}'  # Compétences sous forme de chaînes
+        mock_array[i]['skill'] = f'Skill{i}'  # Définir des compétences comme Skill0, Skill1, ...
         for j in range(1024):
-            mock_array[i][f'vector_{j}'] = np.random.rand()
-    # Mock de np.load pour qu'il retourne notre tableau factice
+            mock_array[i][f'vector_{j}'] = np.random.rand()  # Valeurs aléatoires pour les vecteurs
+
     mock_load.return_value = mock_array
 
     # Définir un vecteur fictif pour tester best_skill
@@ -79,11 +80,15 @@ def test_best_skill(mock_load):
 
     with patch('functions.index', index), patch('functions.vectors_comp', vectors_comp):
     # Appeler la fonction best_skill
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+        from functions import best_skill
+
         threshold_skill=0
         result = best_skill(test_vector, threshold_skill=threshold_skill)
 
     # Vérifier que le résultat est correct (basé sur la logique de ta fonction)
     assert isinstance(result, dict), "Le résultat doit être un dictionnaire"
+
 
 # Fixture client déplacée en dehors de la fonction de test
 @pytest.fixture
