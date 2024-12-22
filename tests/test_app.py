@@ -55,29 +55,32 @@ def test_best_skill(mock_load):
     # Remplir les données avec des valeurs factices
     for i in range(10):
         mock_array[i]['id'] = i
-        mock_array[i]['skill'] = 'Skill' + str(i)  # Compétences sous forme de chaînes
+        mock_array[i]['skill'] = f'Skill{i}'  # Compétences sous forme de chaînes
         for j in range(1024):
-            mock_array[i]['vector_' + str(j)] = np.random.rand()
+            mock_array[i][f'vector_{j}'] = np.random.rand()
     # Mock de np.load pour qu'il retourne notre tableau factice
     mock_load.return_value = mock_array
 
     # Définir un vecteur fictif pour tester best_skill
-    i = 0  # Choisir la première ligne comme exemple
-    vector = np.array([mock_array[i]['vector_' + str(j)] for j in range(1024)])
+    test_vector = np.array([mock_array[0][f'vector_{j}'] for j in range(1024)])
 
-    assert vector.shape == (1024,), "La dimension du vecteur n'est pas 1024"
+    assert test_vector.shape == (1024,), "La dimension du vecteur n'est pas 1024"
 
     vector_dim = 1024
     index = faiss.IndexFlatL2(vector_dim)
-    vectors_comp = np.array([[mock_array[i]['vector_' + str(j)] for j in range(1024)] for i in range(10)])  # Extraire les 1024 dimensions de chaque ligne
+    vectors_comp = np.array([
+        [mock_array[i][f'vector_{j}'] for j in range(1024)]
+        for i in range(10)
+    ])
 
     assert vectors_comp.shape == (10, 1024), "La forme de vectors_comp n'est pas correcte"
 
     index.add(vectors_comp)
 
+    with patch('functions.index', index), patch('functions.vectors_comp', vectors_comp):
     # Appeler la fonction best_skill
-    threshold_skill=0
-    result = best_skill(vector, threshold_skill=threshold_skill)
+        threshold_skill=0
+        result = best_skill(test_vector, threshold_skill=threshold_skill)
 
     # Vérifier que le résultat est correct (basé sur la logique de ta fonction)
     assert isinstance(result, dict), "Le résultat doit être un dictionnaire"

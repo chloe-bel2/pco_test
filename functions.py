@@ -114,15 +114,15 @@ def lignes_segm(cellule):
 
 
 # FONCTION DE SIMILARITE
-is_github_actions = os.getenv('GITHUB_ACTIONS') == 'true'
+'''is_github_actions = os.getenv('GITHUB_ACTIONS') == 'true'
 
 
 if is_github_actions:
     # Si c'est GitHub Actions, utilisez un chemin relatif
     file_path = os.path.join(os.path.dirname(__file__), 'DB_pco', 'array_comp_esco.npy')
-else:
-    # Sinon, utilisez un chemin absolu (pour votre machine locale)
-    file_path = 'C:\\Users\\Utilisateur\\Documents\\Prepa_Diplome\\PCO_nov\\DB_pco\\array_comp_esco.npy'
+else:'''
+# Sinon, utilisez un chemin absolu (pour votre machine locale)
+file_path = 'C:\\Users\\Utilisateur\\Documents\\Prepa_Diplome\\PCO_nov\\DB_pco\\array_comp_esco.npy'
 
 # Charger le fichier .npy avec le chemin approprié
 array_comp = np.load(file_path, allow_pickle = True)
